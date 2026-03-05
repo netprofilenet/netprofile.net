@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Noise texture for atmospheric depth */
+.noise-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* Code blocks */
+pre {
+  @apply bg-neutral-950 text-neutral-300 rounded-lg px-4 py-3 text-sm overflow-x-auto font-mono;
+}
+
+pre code {
+  @apply bg-transparent p-0 text-inherit;
+}
+
+code {
+  @apply bg-neutral-100 text-neutral-800 rounded px-1.5 py-0.5 text-[0.85em] font-mono;
+}
+
+/* Prose for docs */
+.prose h1 { @apply text-3xl font-serif font-normal mb-6; }
+.prose h2 { @apply text-xl font-semibold mt-10 mb-4; }
+.prose p { @apply text-neutral-600 leading-relaxed mb-4; }
+.prose a { @apply text-neutral-900 underline underline-offset-2 hover:text-black; }
+.prose ul { @apply list-disc pl-6 text-neutral-600 space-y-1 mb-4; }
+
+/* Subtle fade-in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
