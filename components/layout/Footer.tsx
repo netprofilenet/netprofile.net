@@ -18,8 +18,10 @@ export default function Footer() {
             <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Product</h3>
             <ul className="space-y-2 text-neutral-500">
               <li><Link href="/speedtest" className="hover:text-neutral-900 transition-colors">Speed Test</Link></li>
+              <li><Link href="/servers" className="hover:text-neutral-900 transition-colors">Servers</Link></li>
+              <li><Link href="/host" className="hover:text-neutral-900 transition-colors">Host a Server</Link></li>
+              <li><Link href="/tools/my-ip" className="hover:text-neutral-900 transition-colors">What Is My IP</Link></li>
               <li><Link href="/docs" className="hover:text-neutral-900 transition-colors">Documentation</Link></li>
-              <li><Link href="/docs/getting-started" className="hover:text-neutral-900 transition-colors">Getting Started</Link></li>
             </ul>
           </div>
 

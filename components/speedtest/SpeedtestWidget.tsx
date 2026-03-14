@@ -2,8 +2,9 @@
 
 import { useRef, useState } from 'react'
 import { QOEClient } from '@/lib/qoe'
-import type { QualityResults, SpeedResults, SampleEvent, ProgressEvent, BandwidthSample } from '@/lib/qoe'
+import type { QualityResults, SpeedResults, SampleEvent, ProgressEvent, BandwidthSample, ServerInfo } from '@/lib/qoe'
 import { makeServerInfo } from '@/lib/config'
+import { isOrchestratorEnabled, fetchTestToken, submitResult } from '@/lib/orchestrator'
 import BandwidthChart from './BandwidthChart'
 import ServerSelector from './ServerSelector'
 
@@ -23,11 +24,13 @@ export default function SpeedtestWidget() {
   const [status, setStatus] = useState<TestStatus>('idle')
   const [mode, setMode] = useState<TestMode>('quality')
   const [serverUrl, setServerUrl] = useState('')
+  const [selectedServer, setSelectedServer] = useState<ServerInfo | null>(null)
   const [results, setResults] = useState<Results>({})
   const [downloadSamples, setDownloadSamples] = useState<{ t: number; v: number }[]>([])
   const [uploadSamples, setUploadSamples] = useState<{ t: number; v: number }[]>([])
   const [statusMsg, setStatusMsg] = useState('')
   const [percentage, setPercentage] = useState(0)
+  const [resultId, setResultId] = useState<string | null>(null)
   const clientRef = useRef<QOEClient | null>(null)
 
   async function runTest() {
@@ -39,10 +42,22 @@ export default function SpeedtestWidget() {
     setUploadSamples([])
     setStatusMsg('Initializing...')
     setPercentage(0)
+    setResultId(null)
 
     try {
-      const client = new QOEClient()
-      client.setServer(makeServerInfo(serverUrl))
+      // If orchestrator is enabled, fetch a test token
+      let authToken: string | undefined
+      const serverId = selectedServer?.id || 'custom'
+
+      if (isOrchestratorEnabled()) {
+        setStatusMsg('Requesting test token...')
+        const tokenData = await fetchTestToken(serverId)
+        authToken = tokenData.token
+      }
+
+      const client = new QOEClient({ authToken })
+      const serverInfo = selectedServer || makeServerInfo(serverUrl)
+      client.setServer(serverInfo)
       clientRef.current = client
 
       client.on('progress', (e: ProgressEvent) => {
@@ -60,27 +75,48 @@ export default function SpeedtestWidget() {
         }
       })
 
+      let testResults: Results = {}
+
       if (mode === 'quality') {
         const r: QualityResults = await client.runQualityTest()
-        setResults({
+        testResults = {
           downloadMbps: r.download.bandwidthMbps,
           uploadMbps: r.upload.bandwidthMbps,
           latencyMs: r.idleLatency.median,
           bufferbloatMs: r.bufferbloat,
           packetLossPct: r.packetLoss.lossPercent,
           qualityScore: r.qualityScore,
-        })
+        }
       } else {
         const r: SpeedResults = await client.runSpeedTest()
-        setResults({
+        testResults = {
           downloadMbps: r.download.bandwidthMbps,
           uploadMbps: r.upload.bandwidthMbps,
           latencyMs: r.idleLatency.median,
           packetLossPct: r.packetLoss.lossPercent,
-        })
+        }
       }
 
+      setResults(testResults)
       setStatus('done')
+
+      // Submit results to orchestrator if enabled
+      if (isOrchestratorEnabled()) {
+        try {
+          const { id } = await submitResult({
+            serverId,
+            testMode: mode,
+            downloadBandwidth: testResults.downloadMbps,
+            uploadBandwidth: testResults.uploadMbps,
+            idleLatency: testResults.latencyMs,
+            packetLoss: testResults.packetLossPct,
+            qualityScore: testResults.qualityScore,
+          })
+          setResultId(id)
+        } catch {
+          // Non-critical — don't fail the test if result submission fails
+        }
+      }
     } catch (err) {
       console.error(err)
       setStatus('error')
@@ -96,7 +132,11 @@ export default function SpeedtestWidget() {
 
   return (
     <div className="space-y-6">
-      <ServerSelector value={serverUrl} onChange={setServerUrl} />
+      <ServerSelector
+        value={serverUrl}
+        onChange={setServerUrl}
+        onServerSelect={setSelectedServer}
+      />
 
       <div className="flex gap-2">
         {(['quality', 'speed'] as TestMode[]).map(m => (
@@ -177,6 +217,13 @@ export default function SpeedtestWidget() {
               <Metric label="Score" value={results.qualityScore.toFixed(0)} unit="/100" />
             )}
           </div>
+          {resultId && (
+            <p className="mt-4 text-xs text-gray-400">
+              <a href={`/profile/${resultId}`} className="underline hover:text-gray-600 transition-colors">
+                View your Network Profile
+              </a>
+            </p>
+          )}
         </div>
       )}
 
