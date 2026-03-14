@@ -22,22 +22,18 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
   )
 }
 
-function IpBadge({ ip, version, label }: { ip: string; version: 4 | 6; label?: string }) {
-  const colors = version === 6
-    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-    : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-
+function IpCard({ ip, version, label }: { ip: string; version: 4 | 6; label?: string }) {
   return (
-    <div className={`border rounded-xl p-5 ${colors}`}>
+    <div className="border border-neutral-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium uppercase tracking-wider opacity-70">
+        <span className="text-xs font-medium uppercase tracking-wider text-neutral-400">
           {label || `IPv${version}`}
         </span>
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${colors}`}>
+        <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-neutral-300 text-neutral-500">
           IPv{version}
         </span>
       </div>
-      <p className="font-mono text-lg md:text-xl font-semibold break-all leading-tight">
+      <p className="font-mono text-lg md:text-xl font-medium text-neutral-900 break-all leading-tight">
         {ip}
       </p>
     </div>
@@ -84,7 +80,6 @@ export default function MyIpClient() {
   const { primary: info, ipv4, ipv6 } = data
   const location = [info.city, info.region, info.country].filter(Boolean).join(', ')
 
-  // Determine which IPs to show
   const hasIPv4 = ipv4 != null
   const hasIPv6 = ipv6 != null
   const isDualStack = hasIPv4 && hasIPv6
@@ -97,19 +92,15 @@ export default function MyIpClient() {
           <span className="text-xs font-medium uppercase tracking-widest text-neutral-500">
             Your IP Address
           </span>
-          <h2 className="font-mono text-3xl md:text-5xl font-bold text-white tracking-tight break-all">
+          <h2 className="font-mono text-3xl md:text-5xl font-semibold text-white tracking-tight break-all">
             {info.ip}
           </h2>
           <div className="flex items-center gap-2">
-            <span className={`inline-block text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full ${
-              info.ipVersion === 6
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-            }`}>
+            <span className="inline-block text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-neutral-300 border border-white/10">
               IPv{info.ipVersion}
             </span>
             {isDualStack && (
-              <span className="inline-block text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="inline-block text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-neutral-300 border border-white/10">
                 Dual-Stack
               </span>
             )}
@@ -120,8 +111,8 @@ export default function MyIpClient() {
       {/* IPv4 / IPv6 Side-by-Side */}
       {(hasIPv4 || hasIPv6) && (
         <div className={`grid gap-4 ${isDualStack ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
-          {hasIPv4 && <IpBadge ip={ipv4!} version={4} label="IPv4 Address" />}
-          {hasIPv6 && <IpBadge ip={ipv6!} version={6} label="IPv6 Address" />}
+          {hasIPv4 && <IpCard ip={ipv4!} version={4} label="IPv4 Address" />}
+          {hasIPv6 && <IpCard ip={ipv6!} version={6} label="IPv6 Address" />}
         </div>
       )}
 
@@ -136,7 +127,7 @@ export default function MyIpClient() {
               <div>
                 <span className="text-lg font-medium">{location}</span>
                 {info.isEU && (
-                  <span className="ml-2 text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-200">
+                  <span className="ml-2 text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500 border border-neutral-200">
                     EU
                   </span>
                 )}

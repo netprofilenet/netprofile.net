@@ -73,15 +73,15 @@ export function getApplicationVerdicts(result: TestResult): ApplicationVerdicts 
 }
 
 export const ratingColor: Record<Rating, string> = {
-  excellent: 'text-emerald-600',
-  good: 'text-blue-600',
+  excellent: 'text-green-600',
+  good: 'text-green-600',
   fair: 'text-amber-600',
   poor: 'text-red-600',
 }
 
 export const ratingBg: Record<Rating, string> = {
-  excellent: 'bg-emerald-50 border-emerald-200',
-  good: 'bg-blue-50 border-blue-200',
+  excellent: 'bg-green-50 border-green-200',
+  good: 'bg-green-50 border-green-200',
   fair: 'bg-amber-50 border-amber-200',
   poor: 'bg-red-50 border-red-200',
 }
