@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@netprofile/qoe-js": "github:netprofilenet/qoe-js#5e82aee",
+    "@netprofile/qoe-js": "github:netprofilenet/qoe-js#21432ac",
     "chart.js": "^4.4.0",
     "next": "^14.0.0",
     "react": "^18.2.0",
