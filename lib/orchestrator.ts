@@ -109,6 +109,7 @@ export interface IpInfo {
   country: string | null
   countryName: string | null
   region: string | null
+  regionCode: string | null
   city: string | null
   postalCode: string | null
   latitude: number | null
@@ -117,6 +118,19 @@ export interface IpInfo {
   asn: number | null
   asOrganization: string | null
   continent: string | null
+  colo: string | null
+  httpProtocol: string | null
+  tlsVersion: string | null
+  tlsCipher: string | null
+  clientTcpRtt: number | null
+  isEU: boolean | null
+  metroCode: string | null
+}
+
+export interface DualStackIpInfo {
+  primary: IpInfo
+  ipv4: string | null
+  ipv6: string | null
 }
 
 export async function fetchIpInfo(): Promise<IpInfo> {
@@ -125,6 +139,30 @@ export async function fetchIpInfo(): Promise<IpInfo> {
   })
   if (!res.ok) throw new Error(`Failed to fetch IP info: ${res.status}`)
   return res.json()
+}
+
+export async function fetchDualStackIpInfo(): Promise<DualStackIpInfo> {
+  const [primary, ipv4Res, ipv6Res] = await Promise.allSettled([
+    fetchIpInfo(),
+    fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) })
+      .then(r => r.json())
+      .then(d => d.ip as string),
+    fetch('https://api64.ipify.org?format=json', { signal: AbortSignal.timeout(3000) })
+      .then(r => r.json())
+      .then(d => d.ip as string),
+  ])
+
+  if (primary.status === 'rejected') throw primary.reason
+
+  const primaryIp = primary.value
+  const ipv4 = ipv4Res.status === 'fulfilled' ? ipv4Res.value : null
+  const ipv6 = ipv6Res.status === 'fulfilled' ? ipv6Res.value : null
+
+  return {
+    primary: primaryIp,
+    ipv4: ipv4 && !ipv4.includes(':') ? ipv4 : null,
+    ipv6: ipv6 && ipv6.includes(':') ? ipv6 : null,
+  }
 }
 
 export interface RateLimitStatus {
