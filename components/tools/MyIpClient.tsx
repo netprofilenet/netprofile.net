@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { fetchDualStackIpInfo, type DualStackIpInfo } from '@/lib/orchestrator'
+import { useCopyToClipboard } from '@/lib/useCopyToClipboard'
 
 function countryFlag(code: string): string {
   return code
@@ -23,6 +24,8 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
 }
 
 function IpCard({ ip, version, label }: { ip: string; version: 4 | 6; label?: string }) {
+  const { copied, copy } = useCopyToClipboard()
+
   return (
     <div className="border border-neutral-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-2">
@@ -33,9 +36,26 @@ function IpCard({ ip, version, label }: { ip: string; version: 4 | 6; label?: st
           IPv{version}
         </span>
       </div>
-      <p className="font-mono text-lg md:text-xl font-medium text-neutral-900 break-all leading-tight">
-        {ip}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-lg md:text-xl font-medium text-neutral-900 break-all leading-tight">
+          {ip}
+        </p>
+        <button
+          onClick={() => copy(ip)}
+          className="shrink-0 p-1.5 rounded-md text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+          aria-label={`Copy IPv${version} address`}
+        >
+          {copied ? (
+            <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+            </svg>
+          )}
+        </button>
+      </div>
     </div>
   )
 }
